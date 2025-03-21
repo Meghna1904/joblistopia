@@ -1,14 +1,33 @@
 
 import { useState, useEffect } from 'react';
 import { getJobs, filterJobs } from '@/data/jobs';
-import { Job, JobCategory, JobType } from '@/types';
+import { Job, JobCategory, JobType, JobFilterOptions } from '@/types';
 import JobCard from './JobCard';
 import JobFilters from './JobFilters';
 
-const JobList = () => {
+interface JobListProps {
+  initialSearchQuery?: string;
+}
+
+const JobList = ({ initialSearchQuery = '' }: JobListProps) => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState<JobFilterOptions>({
+    search: initialSearchQuery,
+    categories: [],
+    types: [],
+    location: '',
+    experienceLevel: ''
+  });
+  
+  useEffect(() => {
+    // Update search when initialSearchQuery changes
+    setFilters(prev => ({
+      ...prev,
+      search: initialSearchQuery
+    }));
+  }, [initialSearchQuery]);
   
   useEffect(() => {
     // Simulate loading delay for animation purposes
@@ -19,25 +38,20 @@ const JobList = () => {
       // Stagger loading for animation effect
       setTimeout(() => {
         setJobs(allJobs);
-        setFilteredJobs(allJobs);
+        setFilteredJobs(filterJobs(filters));
         setLoading(false);
       }, 300);
     };
     
     fetchJobs();
-  }, []);
+  }, [filters.search]);
   
-  const handleFilter = (filters: {
-    search: string;
-    categories: JobCategory[];
-    types: JobType[];
-    location: string;
-    experienceLevel: string;
-  }) => {
+  const handleFilter = (newFilters: JobFilterOptions) => {
     setLoading(true);
+    setFilters(newFilters);
     
     setTimeout(() => {
-      const filtered = filterJobs(filters);
+      const filtered = filterJobs(newFilters);
       setFilteredJobs(filtered);
       setLoading(false);
     }, 300);
@@ -45,7 +59,7 @@ const JobList = () => {
   
   return (
     <div className="space-y-8">
-      <JobFilters onFilter={handleFilter} />
+      <JobFilters initialFilters={filters} onFilter={handleFilter} />
       
       <div className="space-y-4">
         <div className="flex justify-between items-center">

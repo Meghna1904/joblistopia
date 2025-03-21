@@ -2,10 +2,13 @@
 import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import JobList from '@/components/JobList';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Search } from 'lucide-react';
 
 const Jobs = () => {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   
   useEffect(() => {
     // Simulate loading delay for animation
@@ -15,6 +18,11 @@ const Jobs = () => {
     
     return () => clearTimeout(timer);
   }, []);
+  
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Search functionality is handled in JobList component
+  };
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -30,9 +38,30 @@ const Jobs = () => {
                   Find your next opportunity from our extensive job listings
                 </p>
               </div>
+              
+              <form onSubmit={handleSearch} className="flex w-full md:w-auto">
+                <div className="relative flex-grow">
+                  <Input
+                    type="text"
+                    placeholder="Search jobs..."
+                    className="pr-10 w-full"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                  <Button 
+                    size="icon" 
+                    variant="ghost" 
+                    className="absolute right-0 top-0 h-full"
+                    type="submit"
+                  >
+                    <Search className="h-4 w-4" />
+                    <span className="sr-only">Search</span>
+                  </Button>
+                </div>
+              </form>
             </div>
             
-            <JobList />
+            <JobList initialSearchQuery={searchQuery} />
           </div>
         </div>
       </main>
